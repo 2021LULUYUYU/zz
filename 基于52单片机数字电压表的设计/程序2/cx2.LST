@@ -1,0 +1,143 @@
+C51 COMPILER V9.01   CX2                                                                   12/12/2020 18:33:30 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE CX2
+OBJECT MODULE PLACED IN cx2.OBJ
+COMPILER INVOKED BY: E:\单片机学习相关软件\C51keil 开发软件\C51\BIN\C51.EXE cx2.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "regx52.h"                                                                                             
+   2          sbit start=P3^6;
+   3          sbit eoc=P3^7;
+   4          sbit CLK=P0^2;
+   5          sbit oe=P3^2;
+   6          sbit RS=P3^3;
+   7          sbit RW=P3^4;
+   8          sbit E=P3^5;
+   9          unsigned int vol=0;
+  10          unsigned char arr[]={"0123456789"};
+  11          unsigned char str[]={"VOLTAGE:"};
+  12          
+  13          void delay(unsigned int n)  //延时函数
+  14          {
+  15   1        unsigned int i,j;
+  16   1              for(i=0;i<n;i++)
+  17   1              {
+  18   2                for(j=0;j<120;j++);
+  19   2              }
+  20   1      }
+  21          
+  22          void adc()
+  23          {
+  24   1                start=0; // 关闭A/D转换启动信号
+  25   1                start=1; // 打开A/D转换启动信号
+  26   1                delay(5);
+  27   1                start=0; // 关闭A/D转换启动信号
+  28   1                while(eoc!=1);//判断A/D转换结束信号是否为1，1则转换完成，输出
+  29   1            oe=1;   //数据输出允许信号
+  30   1                vol=P2;//读取数据结果
+  31   1                oe=0;//数据输出允许信号
+  32   1      }
+  33          
+  34          void writecom(unsigned char com)//写命令函数
+  35          {
+  36   1          RS=0; //  RS:数据据/命令选择端
+  37   1              RW=0;//  R/W :读/写选择端
+  38   1              E=0; //  使能端：下降沿有效
+  39   1              delay(5);
+  40   1              P1=com;
+  41   1              E=1;
+  42   1              E=0;
+  43   1      }
+  44          
+  45          void writedat(unsigned char dat)//写数据函数
+  46          {
+  47   1          RS=1; //  RS:数据/命令选择端
+  48   1              RW=0;//  R/W :读/写选择端
+  49   1              E=0; // 使能端：下降沿有效
+  50   1              delay(5);
+  51   1              P1=dat;
+  52   1              E=1;
+  53   1              E=0;
+  54   1      }
+  55          
+C51 COMPILER V9.01   CX2                                                                   12/12/2020 18:33:30 PAGE 2   
+
+  56          void initlcd()//初始化LCD1602
+  57          {
+  58   1          writecom(0x38); //0x38;设置16*2显示
+  59   1              writecom(0x0c); //0x0C:设置开显示，不显示光标
+  60   1              writecom(0x06); //0x06:写应该字符后地址指针加1
+  61   1              writecom(0x01); //0x01:显示清0，数据指针清0
+  62   1      }
+  63          
+  64          void display()//显示函数
+  65          {
+  66   1              unsigned int i=0;
+  67   1          unsigned char temp0=0,temp1=0,temp2=0;
+  68   1              vol=(vol*100)/51; //  255/5=51
+  69   1              temp0=vol/100;
+  70   1              temp1=(vol%100)/10;
+  71   1              temp2=vol%10;
+  72   1              
+  73   1          writecom(0x80);//0x80:LCD第一行的起始地址
+  74   1              delay(5);
+  75   1              for(i=0;i<8;i++)//显示字符串 VOLTAGE:
+  76   1              {
+  77   2                writedat(str[i]);
+  78   2                      delay(5);
+  79   2              }
+  80   1              
+  81   1              writecom(0x80+0x40+8);// 0x80+0x40+8 LCD第二行的起始地址+8个字符
+  82   1        delay(5);
+  83   1        writedat(arr[temp0]);
+  84   1        delay(5);
+  85   1              writedat('.');
+  86   1              delay(5);
+  87   1              writedat(arr[temp1]);
+  88   1        delay(5);
+  89   1        writedat(arr[temp2]);
+  90   1        delay(5);
+  91   1        writedat('V');
+  92   1        delay(5);
+  93   1      }
+  94          
+  95          void main()
+  96          {
+  97   1      TMOD=0x01; //T0工作在方式1
+  98   1      TL0=(65536-250)%256;
+  99   1      TH0=(65536-250)/256;
+ 100   1      EA=1;
+ 101   1      ET0=1;
+ 102   1      TR0=1;
+ 103   1      
+ 104   1        initlcd();
+ 105   1        while(1)
+ 106   1              {
+ 107   2                adc();
+ 108   2                      display();
+ 109   2              }
+ 110   1      }
+ 111          void Timer0( ) interrupt 1
+ 112          {
+ 113   1      TL0=(65536-250)%256;
+ 114   1      TH0=(65536-250)/256;
+ 115   1      CLK=~CLK;
+ 116   1      }
+
+C51 COMPILER V9.01   CX2                                                                   12/12/2020 18:33:30 PAGE 3   
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    307    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     22       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
