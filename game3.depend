@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1633706830 source:c:\users\administrator\desktop\代码\新建文件夹\game3\main.c
+	"game3.h"
+
+1633707385 c:\users\administrator\desktop\代码\新建文件夹\game3\game3.h
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+	<math.h>
+	<time.h>
+	<conio.h>
+	<Windows.h>
+
